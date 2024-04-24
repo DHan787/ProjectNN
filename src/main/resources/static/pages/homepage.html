@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Fusion Studio</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<div class="container">
+    <div class="menu">☰</div>
+    <div class="title-section">
+        <h1>ART FUSION<br>STUDIO</h1>
+        <p>Unleash the power of creativity with Art Fusion Studio.</p>
+        <button onclick="window.location.href = 'pages/filegen.html'">Generate Image</button>
+    </div>
+    <div class="banners">
+        <div class="explore-banner">
+            <input type="file" id="styleFileInput" required>
+            <button onclick="uploadFile('styleFileInput', '/upload/style')">Upload Style Image</button>
+        </div>
+        <div class="upload-banner">
+            <input type="file" id="originalFileInput" required>
+            <button onclick="uploadFile('originalFileInput', '/upload/original')">Upload Original Image</button>
+        </div>
+    </div>
+    <div class="project-name">Team Easy</div>
+</div>
+
+<script>
+    function uploadFile(inputId, uploadUrl) {
+        const fileInput = document.getElementById(inputId);
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('Please select a file first!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch(uploadUrl, {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => alert('Error uploading file: ' + error));
+    }
+</script>
+</body>
+</html>

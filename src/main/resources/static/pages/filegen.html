@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Image</title>
+</head>
+<body>
+<h1>Generate an Image</h1>
+<h1>Choose a Parameter</h1>
+<select id="parameterSelect">
+    <option value="1000">1000</option>
+    <option value="10000">10,000</option>
+    <option value="100000">100,000</option>
+    <option value="1000000">1,000,000</option>
+    <option value="10000000">10,000,000</option>
+    <option value="100000000">100,000,000</option>
+    <option value="1000000000">1,000,000,000</option>
+    <option value="10000000000">10,000,000,000</option>
+    <option value="100000000000">100,000,000,000</option>
+</select>
+<button id="generateButton">Generate Image</button>
+<p id="statusMessage" style="display: none;">Please wait, generating image...</p>
+<img id="resultImage" src="" alt="Generated Image" style="display: none;">
+
+<script>
+    document.getElementById('generateButton').addEventListener('click', function () {
+        var statusMessage = document.getElementById('statusMessage');
+        var resultImage = document.getElementById('resultImage');
+        var parameter = document.getElementById('parameterSelect').value;
+        resultImage.style.display = 'none'; // Hide image initially
+        statusMessage.style.display = 'block'; // Show the waiting message
+        statusMessage.textContent = 'Please wait, generating image...';
+
+        fetch('/generate-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({parameter: parameter})
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Failed to generate image');
+                }
+                return response.blob();
+            })
+            .then(function (blob) {
+                var imageUrl = URL.createObjectURL(blob);
+                resultImage.src = imageUrl;
+                resultImage.style.display = 'block';
+                statusMessage.style.display = 'none'; // Hide the message after loading
+            })
+            .catch(function (error) {
+                statusMessage.textContent = 'Error: ' + error.message;
+            });
+    });
+</script>
+</body>
+</html>
