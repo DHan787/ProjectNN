@@ -5,63 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Art Fusion Studio - Image Generator</title>
     <link rel="stylesheet" href="css/styles.css">
-    <style>
-        .niceButton {
-            background-color: #EBE6A2;
-            border-radius: 12px;
-            border: none;
-            color: rgba(18, 40, 119, 0.5);
-            padding: 16px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            -webkit-transition-duration: 0.4s;
-            transition-duration: 0.4s;
-            cursor: pointer;
-        }
-
-        .niceButton:hover {
-            background-color: #fff;
-            color: #1795bb;
-            border: 1px solid #ccc;
-        }
-
-
-        #statusMessage, #resultImage, #imageModal {
-            display: none;
-        }
-
-        .modal {
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-        }
-
-    </style>
 </head>
 <body>
 <div class="container">
-    <div onclick="rickrolled()" class="menu">☰</div>
+    <div id="playButton" class="menu">MENU ☰</div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <video id="rickVideo" src="rickroll/rickroll.mkv" controls></video>
+        </div>
+    </div>
     <div class="title-section">
         <h1>ART FUSION<br>STUDIO</h1>
         <p><strong>Unleash the power of creativity with Art Fusion Studio.</strong></p>
-        <p><strong style="font-size: 20px">Select the style weight.</strong>(note: The bigger the number is, the more
+        <p><strong style="font-size: 20px">SELECT THE STYLE WEIGHT.</strong>(note: The bigger the number is, the more
             intense the style is.)
         </p>
         <select class="niceButton" id="parameterSelect">
@@ -104,123 +61,6 @@
     </div>
 </div>
 
-<script>
-    function requestAccess(sessionId) {
-        fetch(`/request-access?sessionId=${sessionId}`)
-            .then(response => response.text())
-            .then(data => {
-                if (data === "Access granted") {
-                    alert("You can generate the image now.");
-                    performImageGeneration();
-                } else {
-                    alert(data);
-                    setTimeout(() => requestAccess(sessionId), 5000); // 5秒后再次检查
-                }
-            });
-    }
-
-    function releaseAccess() {
-        fetch(`/release-access`, {method: 'POST'});
-    }
-
-    document.getElementById('generateButton').addEventListener('click', function () {
-        const sessionId = 'userSessionId';  // 从某处获取或生成会话ID
-        requestAccess(sessionId);
-    });
-
-    function previewBackground(input, targetClass) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                // 获取指定类名的元素，并设置其背景图片
-                var targetDiv = document.querySelector('.' + targetClass);
-                if (targetDiv) {
-                    targetDiv.style.backgroundImage = 'url(' + e.target.result + ')';
-                    targetDiv.style.backgroundSize = 'cover'; // 覆盖整个背景
-                }
-            };
-
-            reader.readAsDataURL(input.files[0]); // 读取文件并将其作为DataURL返回
-        }
-    }
-
-    function uploadFile(inputId, uploadUrl) {
-        const fileInput = document.getElementById(inputId);
-        const file = fileInput.files[0];
-        if (!file) {
-            alert('Please select a file first!');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        fetch(uploadUrl, {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => response.text())
-            .then(data => alert(data))
-            .catch(error => alert('Error uploading file: ' + error));
-    }
-
-    function rickrolled() {
-        window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-    }
-
-    document.getElementById('generateButton').addEventListener('click', function () {
-        var statusMessage = document.getElementById('statusMessage');
-        var modal = document.getElementById('imageModal');  // 获取模态框元素
-        var resultImage = document.getElementById('resultImage');  // 获取图片元素
-        var parameter = document.getElementById('parameterSelect').value;  // 获取用户选择的参数值
-        resultImage.style.display = 'none';  // 初始隐藏图片
-        statusMessage.style.display = 'block';  // 显示加载状态信息
-        statusMessage.textContent = 'Please wait, generating image...';
-
-        fetch('/generate-image', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({parameter: parameter})
-        })
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('Failed to generate image');
-                }
-                return response.blob();  // 将响应转换为Blob对象
-            })
-            .then(function (blob) {
-                var imageUrl = URL.createObjectURL(blob);  // 从Blob创建URL
-                resultImage.src = imageUrl;  // 设置图片元素的源
-                resultImage.onload = function () {  // 确保图片加载完成后再显示
-                    modal.style.display = 'block';  // 显示模态框
-                    resultImage.style.display = 'block';  // 显示图片
-                    statusMessage.style.display = 'none';  // 隐藏加载状态信息
-                }
-                releaseAccess();
-            })
-            .catch(function (error) {
-                statusMessage.textContent = 'Error: ' + error.message;  // 显示错误信息
-                console.error('Error loading image:', error);
-            });
-    });
-
-    var span = document.getElementsByClassName("close")[0];  // 获取关闭按钮
-    var modal = document.getElementById('imageModal');  // 获取模态框元素
-
-    span.onclick = function () {
-        modal.style.display = "none";  // 点击关闭按钮时隐藏模态框
-    }
-
-    window.onclick = function (event) {
-        if (event.target == modal) {
-            modal.style.display = "none";  // 点击模态框外围时关闭模态框
-        }
-    }
-</script>
-
-
+<script src="script/script.js"></script>
 </body>
 </html>

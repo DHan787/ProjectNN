@@ -1,5 +1,8 @@
 HELP.md
 target/
+rickroll.mp4
+original.jpg
+style.jpg
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
